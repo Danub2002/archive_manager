@@ -2,6 +2,8 @@ import socket
 import threading
 import random
 import time
+import os
+import shutil
 
 CENTRAL_SERVER_ADDRESS = ('localhost', 9000)
 
@@ -33,15 +35,28 @@ class CentralServer:
         with self.lock:
             # Servidores disponíveis são todos os servidores
             available_servers = list(self.storage_servers)
-            
+
             if not available_servers:
                 response = "No storage servers available."
                 client_socket.send(response.encode())
                 return
-    
+
             # Escolhe um servidor aleatório entre todos os servidores disponíveis
             selected_server = random.choice(available_servers)
-            # Garante que todas as réplicas são armazenadas no mesmo servidor
+
+            # Cria réplicas copiando o arquivo original para a pasta de réplicas no servidor sorteado
+            original_file_path = os.path.join('C:\\Users\\crist\\File-Deposit-App', filename)
+            original_file_name, original_file_extension = os.path.splitext(filename)
+
+            replica_folder_path = f'replica_folder_{selected_server[1]}'
+            os.makedirs(replica_folder_path, exist_ok=True)
+
+            for replica_number in range(1, tolerance + 1):
+                replica_filename = f'{original_file_name}_replica_{replica_number}{original_file_extension}'
+                replica_path = os.path.join(replica_folder_path, replica_filename)
+                shutil.copy(original_file_path, replica_path)
+
+            # Garante que todas as réplicas são armazenadas no mesmo servidor sorteado
             self.file_replication_map[filename] = [selected_server] * tolerance
 
         response = f"File {filename} deposited successfully on server {selected_server}"
@@ -51,12 +66,28 @@ class CentralServer:
         _, filename = request.split()
 
         with self.lock:
-            server_with_replica = self.file_replication_map.get(filename, [])
+            replicas_content = []
+            original_file_name, original_file_extension = os.path.splitext(filename)
 
-        if server_with_replica:
-            response = f"File {filename} found on server {server_with_replica}"
-        else:
-            response = f"File {filename} not found on any server"
+            for server_with_replica in self.file_replication_map.get(filename, []):
+                server = server_with_replica[0]
+                replica_folder = server_with_replica[1]
+
+                replica_folder_path = f'replica_folder_{replica_folder[1]}'
+
+                # Encontra todas as réplicas no diretório
+                replicas = [f for f in os.listdir(replica_folder_path) if f.startswith(original_file_name)]
+
+                for replica_filename in replicas:
+                    replica_path = os.path.join(replica_folder_path, replica_filename)
+                    with open(replica_path, 'rb') as f:  # Alteração aqui para modo binário
+                        content = f.read().decode(errors='replace')
+                        replicas_content.append(f"Replica from {server}: {content}")
+
+            if replicas_content:
+                response = f"File {filename} found on servers with replicas:\n" + '\n'.join(replicas_content)
+            else:
+                response = f"File {filename} not found on any server"
 
         client_socket.send(response.encode())
 
@@ -68,16 +99,41 @@ class CentralServer:
             if filename in self.file_replication_map:
                 current_replicas = len(self.file_replication_map[filename])
 
-                if new_replicas > current_replicas:
-                    # Adiciona réplicas
-                    available_servers = [server for server in self.storage_servers if server not in self.file_replication_map[filename]]
-                    additional_servers = random.sample(available_servers, new_replicas - current_replicas)
-                    self.file_replication_map[filename].extend(additional_servers)
-                elif new_replicas < current_replicas:
-                    # Remove réplicas
-                    self.file_replication_map[filename] = self.file_replication_map[filename][:new_replicas]
+                original_file_name, original_file_extension = os.path.splitext(filename)
 
-                response = f"Number of replicas for {filename} updated to {new_replicas}"
+                if current_replicas > 0:
+                    # Adiciona réplicas
+                    if new_replicas > current_replicas:
+                        available_servers = [server for server in self.storage_servers if server not in self.file_replication_map[filename]]
+                        additional_servers = random.sample(available_servers, min(new_replicas - current_replicas, len(available_servers)))
+
+                        for server in additional_servers:
+                            replica_folder_path = f'replica_folder_{server[1]}'
+                            os.makedirs(replica_folder_path, exist_ok=True)
+
+                            original_file_path = os.path.join('C:\\Users\\crist\\File-Deposit-App', filename)
+
+                            for replica_number in range(current_replicas + 1, new_replicas + 1):
+                                replica_filename = f'{original_file_name}_replica_{replica_number}{original_file_extension}'
+                                replica_path = os.path.join(replica_folder_path, replica_filename)
+                                shutil.copy(original_file_path, replica_path)
+
+                        # Atualiza a lista de réplicas no mapa
+                        self.file_replication_map[filename].extend([(server, server[1]) for server in additional_servers])
+                    # Remove réplicas
+                    elif new_replicas < current_replicas:
+                        removed_servers = self.file_replication_map[filename][new_replicas:]
+                        self.file_replication_map[filename] = self.file_replication_map[filename][:new_replicas]
+
+                        for server, replica_folder in removed_servers:
+                            replica_folder_path = f'replica_folder_{replica_folder}'
+                            shutil.rmtree(replica_folder_path)
+
+                        response = f"Number of replicas for {filename} updated to {new_replicas}"
+                    else:
+                        response = f"Number of replicas for {filename} remains unchanged"
+                else:
+                    response = f"File {filename} has no replicas. Use DEPOSIT to add replicas first."
             else:
                 response = f"File {filename} not found"
 
