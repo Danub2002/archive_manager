@@ -8,10 +8,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+servers_ports=(3030, 5001, 5002, 5003, 5004)
 proxy_port = int(os.getenv('PROXY_PORT'))
 proxy_host = os.getenv('PROXY_HOST')
 
-def send_server_up_notification():
+""" def send_server_up_notification():
     send_message(
         "SERVER UP",
         proxy_host,
@@ -24,7 +25,7 @@ def handle_shutdown(host, port):
         "SERVER DOWN",
         proxy_host,
         proxy_port
-    )
+    ) """
 
 def store_file(client_socket, filename):
     with open(filename, 'wb') as file:
@@ -51,7 +52,7 @@ def retrieve_file(filename):
 def process_message(client_socket):
     message = client_socket.recv(1024).decode('utf-8')
 
-    if message.startswith("RECOVER"):
+    if message.startswith("retrieve"):
         print("RECOVER message received")
         filename = message.split(' ')[1].split('.')[0]
 
@@ -66,7 +67,7 @@ def process_message(client_socket):
             print(f"The file '{filename}' has been deleted.")
         else:
             print(f"The file '{filename}' does not exist on this server.")
-    elif message.startswith("STORE"):
+    elif message.startswith("deposit"):
         filename = message.split(" ")[1]
         if not os.path.exists(filename):
             store_file(client_socket, filename)
@@ -74,7 +75,7 @@ def process_message(client_socket):
             print(f'File {filename} already exists in this server')
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
+    """ if len(sys.argv) > 1:
         arg = sys.argv[1]
 
         if arg.startswith("PORT="):
@@ -87,10 +88,18 @@ if __name__ == "__main__":
         print("Error: No given argument.  Use the format 'PORT=port_number'.")
 
     signal.signal(signal.SIGTERM, handle_shutdown)
-    signal.signal(signal.SIGINT, handle_shutdown)
+    signal.signal(signal.SIGINT, handle_shutdown) """
+    
+    """ for server_port in servers_ports:
+        server_socket = start_server(server_port)
+        print(f'server up and running at localhost:{server_port}') """
+    
+    server_socket = start_server(servers_ports[0])
+    print(f'server up and running at localhost:{servers_ports[0]}')
 
-    print("Server recognized by proxy")
+    #print("Server recognized by proxy")
     while True:
+        
         print("waiting message")
         client_socket, client_address = server_socket.accept()
         print(f"Connection from {client_address}")
