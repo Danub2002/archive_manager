@@ -17,7 +17,7 @@
 
 
 ## Special thanks to 🥰:
-- [Gustavo Bittencourt Figueiredo](http://buscatextual.cnpq.br/buscatextual/visualizacv.do;jsessionid=717F388996DEE35B7CBDC04F07273B02.buscatextual_0), Your experience and knowledge have been invaluable to our progress.
+- [Gustavo Bittencourt Figueiredo]([http://buscatextual.cnpq.br/buscatextual/visualizacv.do;jsessionid=717F388996DEE35B7CBDC04F07273B02.buscatextual_0](https://lattes.cnpq.br/2204147669620762)), our professro your experience and knowledge have been invaluable to our progress.
 
 ## About 🤔:
 
