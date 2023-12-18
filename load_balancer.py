@@ -2,6 +2,7 @@ import socket
 import threading
 import os
 from dotenv import load_dotenv
+from time import sleep
 
 load_dotenv()
 class LoadBalancer:
@@ -12,9 +13,7 @@ class LoadBalancer:
         self.host = ''
         self.port = port
 
-    def add_server(self, server_name, port):
-        self.server_table.append(port)
-    
+
     def start(self):
         server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server_socket.bind((self.host, self.port))
@@ -27,7 +26,7 @@ class LoadBalancer:
             print(f"Conexão estabelecida com {address[0]}:{address[1]}")
             threading.Thread(target=self.handle_client, args=(client_socket,address[0],address[1],)).start()
   
-    
+  
     def handle_client(self,client_socket,host,port):
         request = client_socket.recv(1024).decode()
 
@@ -45,17 +44,27 @@ class LoadBalancer:
                 print(f"({host},{port}) Removed from Server List")    
 
             return
-        
-        command, filename, tolerance, data = request.split("/")
 
+        command,filename,tolerance,data = "","","",""    
+        args = request.split("/")
+        print(args)
+        if len(args) > 2:
+            command,filename,tolerance,data = args
+        else:
+            command,filename = args
+        
         if command == "deposit":
+            
             self.handle_deposit(filename,int(tolerance),data)
         
         elif command == "retrieve":
-            data = self.handle_retrieve(filename)
-            client_socket.send(data.encode())
+        
+            filename,data = self.handle_retrieve(filename)
+            message = f"{filename}/{data}"
+            client_socket.send(message.encode())
+        
             client_socket.close()
-
+        
     def handle_deposit(self, filename, tolerance, data):
 
         if tolerance > len(self.server_list):
@@ -90,12 +99,14 @@ class LoadBalancer:
 
         #  Pega o primeiro Server
         server_host,server_port = self.file_table[filename][0]
-        sock.connect((server_host,server_port))
+        sock.connect((server_host,int(server_port)))
         sock.send(f"retrieve/{filename}".encode())
 
-        data = sock.recv(1024).decode()
+        response = sock.recv(1024).decode()
+        filename,data = response.split("/")
+        print(response)
         sock.close()
-        return data
+        return filename,data
         
     
     def add_server(self, client_sock):

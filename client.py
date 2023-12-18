@@ -13,6 +13,7 @@ def deposit(filename, tolerance):
     data = file.read()    
 
   message = f'deposit/{filename}/{tolerance}/{data}'
+  print(message)
   send_message(message,proxy_host,proxy_port)
 
 
@@ -23,7 +24,9 @@ def retrieve(filename):
   client_socket.connect((proxy_host, proxy_port))
 
   client_socket.send(message.encode())
-  data = client_socket.recv(1024).decode()
+  response = client_socket.recv(1024).decode()
+
+  filename,data = response.split("/")
   client_socket.close()
 
 
@@ -46,7 +49,8 @@ while True:
   if mode == "1":
     tolerance = input("Enter Tolerance:")
     deposit(filename,tolerance)
-  # filename = "test.txt"
+  else:
+    retrieve(filename)
 
   fi = open(filename, "r")
   data = fi.read()
