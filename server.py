@@ -38,16 +38,18 @@ def store_file(data, filename):
 def retrieve_file(client_socket,filename):
     # client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     # client_socket.connect((proxy_host, proxy_port))
+    filename, ext = filename.split(".")
     
-    data= open(f"{filename}", "r").read()
-    # with open(filename, 'rb') as file:
-    #     data = file.read(1024)
-    #     while data:
-    #         client_socket.send(data)
-    #         data = file.read(1024)
+    arquivo = ''
+    for arq in os.listdir():
+        if arq.split("_")[0] == filename:
+            arquivo = arq
+            break
 
-    name,ext = filename.split(".")
-    message = f"{name}_retrivied_.{ext}/{data}"
+    
+    data= open(f"{arquivo}", "r").read()
+
+    message = f"{filename}_retrivied_.{ext}/{data}"
     client_socket.send(message.encode())
     client_socket.close()
 
@@ -63,13 +65,16 @@ def process_message(client_socket):
         print(f"Recovering file: {filename}")
         print("\nRelaying file to proxy...")
 
-    elif message.startswith("DELETE"):
-        filename = message.split(" ")[1]
+    elif message.startswith("delete"):
+        filename = message.split("/")[1]
+        
+        
         if os.path.exists(filename):
             os.remove(filename)
             print(f"The file '{filename}' has been deleted.")
         else:
             print(f"The file '{filename}' does not exist on this server.")
+    
     elif message.startswith("deposit"):
         filename = message.split("/")[1]
         data = message.split("/")[2]

@@ -52,8 +52,5 @@ while True:
   else:
     retrieve(filename)
 
-  fi = open(filename, "r")
-  data = fi.read()
-
 
   

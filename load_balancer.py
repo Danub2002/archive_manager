@@ -68,9 +68,22 @@ class LoadBalancer:
     def handle_deposit(self, filename, tolerance, data):
 
         if tolerance > len(self.server_list):
-            print("Less servers than replicas")
-            return
+            print(f"WARNING: Less servers than replicas. Just {len(self.server_list)} replica(s) created.")
+            tolerance = len(self.server_list) 
         
+        if filename in self.file_table and len(self.file_table[filename]) > tolerance: #dimnuir 
+            print("Reducing tolerance level.")
+            cont = len(self.file_table[filename]) - tolerance
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            
+            while cont:
+                # delete aquela copia
+                server_host, server_port  = self.file_table[filename].pop()
+                
+                sock.connect((server_host, int(server_port)))
+                sock.send(f"delete/{filename}_{cont+tolerance}".encode())
+                cont = cont - 1
+                
         servers = []
         idx = 0
         while tolerance:
@@ -82,9 +95,7 @@ class LoadBalancer:
             name,ext = filename.split(".")
             sock.send(f"deposit/{name}_{idx}.{ext}/{data}".encode())
 
-            servers.append(self.server_list[idx]) 
-
-           
+            servers.append(self.server_list[idx])            
             tolerance-=1;idx+=1
             sock.close()
 
@@ -99,7 +110,7 @@ class LoadBalancer:
 
         #  Pega o primeiro Server
         server_host,server_port = self.file_table[filename][0]
-        sock.connect((server_host,int(server_port)))
+        sock.connect((server_host, int(server_port)))
         sock.send(f"retrieve/{filename}".encode())
 
         response = sock.recv(1024).decode()
