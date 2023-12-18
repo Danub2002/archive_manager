@@ -9,21 +9,21 @@ class LoadBalancer:
         self.file_table = {}
         self.server_list = []
         
-        self.host = host
+        self.host = ''
         self.port = port
 
     def add_server(self, server_name, port):
         self.server_table.append(port)
     
     def start(self):
-        socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        socket.bind((self.host, self.port))
-        socket.listen(5)
+        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server_socket.bind((self.host, self.port))
+        server_socket.listen(5)
         print(f"Load Balancer iniciado e escutando em {self.host}:{self.port}")
 
         while True:
 
-            client_socket, address = socket.accept()
+            client_socket, address = server_socket.accept()
             print(f"Conexão estabelecida com {address[0]}:{address[1]}")
             threading.Thread(target=self.handle_client, args=(client_socket,address[0],address[1],)).start()
   
@@ -32,7 +32,8 @@ class LoadBalancer:
         request = client_socket.recv(1024).decode()
 
         if request.startswith("SERVER"):
-            command = request.split()
+            command = request.split(':')[0].split()[1]
+            port = request.split(':')[1]
             if command == "UP":
                 self.server_list.append((host,port))
                 print(f"({host},{port}) added to Server List")
@@ -48,16 +49,12 @@ class LoadBalancer:
         command, filename, tolerance, data = request.split("/")
 
         if command == "deposit":
-            self.handle_deposit(filename,tolerance,data)
+            self.handle_deposit(filename,int(tolerance),data)
         
         elif command == "retrieve":
             data = self.handle_retrieve(filename)
             client_socket.send(data.encode())
             client_socket.close()
-        
-  
-
-
 
     def handle_deposit(self, filename, tolerance, data):
 
@@ -71,7 +68,7 @@ class LoadBalancer:
             server_host, server_port =  self.server_list[idx]
 
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.connect((server_host, server_port))
+            sock.connect((server_host, int(server_port)))
 
             name,ext = filename.split(".")
             sock.send(f"deposit/{name}_{idx}.{ext}/{data}".encode())
@@ -80,7 +77,7 @@ class LoadBalancer:
 
            
             tolerance-=1;idx+=1
-            self.socket.close()
+            sock.close()
 
         self.file_table[filename] = servers
         
@@ -115,6 +112,4 @@ if __name__ == "__main__":
     host = os.getenv("PROXY_HOST")
     port = int(os.getenv("PROXY_PORT"))
     lb = LoadBalancer(host, port)
-    lb.add_server("Servidor1", 8000)
-    lb.add_server("Servidor2", 8001)
     lb.start()

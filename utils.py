@@ -8,7 +8,7 @@ def start_server(port):
     host = os.getenv('SERVER_HOST')
 
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_socket.bind((host, port))
+    server_socket.bind(('', port))
     server_socket.listen(5)  
 
     print(f"Up and running on {host}:{port}")

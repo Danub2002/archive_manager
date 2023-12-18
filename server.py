@@ -11,9 +11,9 @@ load_dotenv()
 proxy_port = int(os.getenv('PROXY_PORT'))
 proxy_host = os.getenv('PROXY_HOST')
 
-def send_server_up_notification():
+def send_server_up_notification(port):
     send_message(
-        "SERVER UP",
+        f"SERVER UP:{port}",
         proxy_host,
         proxy_port
     )
@@ -21,7 +21,7 @@ def send_server_up_notification():
 def handle_shutdown(host, port):
     print(f'Server at {host}:{port} shutting down')
     send_message(
-        "SERVER DOWN",
+        f"SERVER DOWN:{port}",
         proxy_host,
         proxy_port
     )
@@ -51,7 +51,7 @@ def retrieve_file(filename):
 def process_message(client_socket):
     message = client_socket.recv(1024).decode('utf-8')
 
-    if message.startswith("RECOVER"):
+    if message.startswith("retrieve"):
         print("RECOVER message received")
         filename = message.split(' ')[1].split('.')[0]
 
@@ -66,7 +66,7 @@ def process_message(client_socket):
             print(f"The file '{filename}' has been deleted.")
         else:
             print(f"The file '{filename}' does not exist on this server.")
-    elif message.startswith("STORE"):
+    elif message.startswith("deposit"):
         filename = message.split(" ")[1]
         if not os.path.exists(filename):
             store_file(client_socket, filename)
@@ -80,7 +80,7 @@ if __name__ == "__main__":
         if arg.startswith("PORT="):
             port = int(arg.split("=")[1])
             server_socket = start_server(port)
-            send_server_up_notification()
+            send_server_up_notification(port)
         else:
             print("Error: Wrong argument. Use the format 'PORT=port_number'.")
     else:
