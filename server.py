@@ -17,13 +17,14 @@ def send_server_up_notification(port):
         proxy_port
     )
 
-def handle_shutdown(host, port):
-    print(f'Server at {host}:{port} shutting down')
+def handle_shutdown(port):
+    print(f'Server at localhost:{port} shutting down')
     send_message(
         f"SERVER DOWN:{port}",
         proxy_host,
         proxy_port
     )
+    exit(0)
 
 def store_file(data, filename):
   
@@ -79,24 +80,24 @@ def process_message(client_socket):
         #     print(f'File {filename} already exists in this server')
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        arg = sys.argv[1]
+    try:
+        if len(sys.argv) > 1:
+            arg = sys.argv[1]
 
-        if arg.startswith("PORT="):
-            port = int(arg.split("=")[1])
-            server_socket = start_server(port)
-            send_server_up_notification(port)
+            if arg.startswith("PORT="):
+                port = int(arg.split("=")[1])
+                server_socket = start_server(port)
+                send_server_up_notification(port)
+            else:
+                print("Error: Wrong argument. Use the format 'PORT=port_number'.")
         else:
-            print("Error: Wrong argument. Use the format 'PORT=port_number'.")
-    else:
-        print("Error: No given argument.  Use the format 'PORT=port_number'.")
+            print("Error: No given argument.  Use the format 'PORT=port_number'.")
 
-    signal.signal(signal.SIGTERM, handle_shutdown)
-    signal.signal(signal.SIGINT, handle_shutdown)
-
-    print("Server recognized by proxy")
-    while True:
-        print("waiting message")
-        client_socket, client_address = server_socket.accept()
-        print(f"Connection from {client_address}")
-        process_message(client_socket)
+        print("Server recognized by proxy")
+        while True:
+            print("waiting message")
+            client_socket, client_address = server_socket.accept()
+            print(f"Connection from {client_address}")
+            process_message(client_socket)
+    except KeyboardInterrupt:
+        handle_shutdown(port)
