@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-def start_server(port: int):
+def start_server(port):
     host = os.getenv('SERVER_HOST')
 
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -19,5 +19,5 @@ def start_server(port: int):
 def send_message(message, address, port):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client_socket.connect((address, port))
-    client_socket.send(message.encode('utf-8'))
+    client_socket.send(message.encode('utf-8')) 
     client_socket.close()
