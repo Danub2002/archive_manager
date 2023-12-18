@@ -12,6 +12,8 @@
 - [Fernando Schettini](https://linktr.ee/fernandoschett).
 - [Guilherme Fontes](https://github.com/guichfontes).
 - [Danilo Andrade](https://github.com/guichfontes).
+- [João Pedro Costa Chaves](https://github.com/jompp).
+- [Diego Qualloss](https://github.com/qualloss)
 
 
 ## Special thanks to 🥰:
@@ -76,7 +78,7 @@ classDiagram
 
 ## Development Process ⚙️:
 
-Developers used [Trello]() to get things organized, each one using their own branch to code, using names to identify the commit type then merginng the features into develop branch. After testing, the group update the main branch. This application was developed in xx/xx/20xx until xx/xx/20xx.
+Developers didn't use a specific methodology for development; occasionally, they would join Discord to code together.
 
 ### Tools Used 🛠️: 
 
@@ -89,12 +91,3 @@ Feel free to create a new branch, fork the project, create a new Issue or make a
 ## Licence 📜:
 
 [Apache V2](https://choosealicense.com/licenses/apache-2.0/)
-
-## References 📙:
-	
-[1] <last_author_name>, <first_author_name>. <work_title>. XX/XX/XX.
-	
-[2] <work_title>, <author_name>. Avaliable in: <https://www.link.com>. Access in em XX/XX/XX.
-
-### Important links 🔗:
-
