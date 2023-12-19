@@ -16,8 +16,12 @@
 - [Diego Qualloss](https://github.com/qualloss).
 
 
+## Link to video:
+https://youtu.be/2gOGSE18ZCU?si=o19lE_-1cJf89G_y
+
+
 ## Special thanks to 🥰:
-- [Gustavo Bittencourt Figueiredo](http://buscatextual.cnpq.br/buscatextual/visualizacv.do;jsessionid=717F388996DEE35B7CBDC04F07273B02.buscatextual_0), our professro your experience and knowledge have been invaluable to our progress
+- [Gustavo Bittencourt Figueiredo](http://buscatextual.cnpq.br/buscatextual/visualizacv.do;jsessionid=717F388996DEE35B7CBDC04F07273B02.buscatextual_0), our professor your experience and knowledge have been invaluable to our progress
 
 ## About 🤔:
 
