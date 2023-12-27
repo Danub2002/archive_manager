@@ -64,6 +64,16 @@ First, clone this repository. After that, execute the entity's file with the com
 </div>
 <h4 align="center">Figure 1 - Running project image. </h4>
 
+
+## Logic Model 🧮:
+
+<div align="center">
+	<a href="">
+	<img height = "250em" src = "https://github.com/Danub2002/archive_manager/assets/80331486/48b680ca-665b-4183-9809-435932db0be1" />
+    </a>
+</div>
+<h4 align="center">Figure 2 - System Logic Model.</h4>
+
 ### Tools Used 🛠️: 
 
 - [Visual Studio Code](https://code.visualstudio.com). 
